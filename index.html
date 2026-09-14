@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>尚雯婕听写法 · 英语精听练习</title>
+<style>
+  :root{
+    --bg:#f5f6fb; --card:#ffffff; --line:#e7e9f2;
+    --accent:#5b5bd6; --accent-dark:#4a4ac0;
+    --text:#1f2333; --muted:#7a7f95;
+    --ok-bg:#e5f6e8; --ok-text:#1c7f37;
+    --bad-bg:#fdecec; --bad-text:#c62828;
+    --warn-bg:#fff4e0; --warn-text:#b26a00;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.6;
+    min-height:100vh; padding:24px 16px 60px;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  header{text-align:center; margin:16px 0 24px;}
+  header h1{font-size:28px; font-weight:800; letter-spacing:1px;}
+  header .sub{color:var(--muted); font-size:14px; margin-top:4px;}
+  header .sub b{color:var(--accent);}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(20,24,60,.05);
+  }
+  h2{font-size:17px; font-weight:700; margin-bottom:12px;}
+  .hidden{display:none !important;}
+
+  /* 提示步骤 */
+  .steps{display:grid; gap:8px; font-size:14px; color:var(--muted);}
+  .steps span::before{content:attr(data-n)" "; color:var(--accent); font-weight:800;}
+
+  /* 文章列表 */
+  .passage-list{display:grid; gap:10px;}
+  .passage{
+    display:flex; align-items:center; gap:12px; text-align:left; width:100%;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; cursor:pointer; transition:.15s;
+  }
+  .passage:hover{border-color:var(--accent); transform:translateY(-1px); box-shadow:0 4px 14px rgba(91,91,214,.12);}
+  .passage .meta{flex:1; min-width:0;}
+  .passage .title{font-weight:700; font-size:15px;}
+  .passage .tags{display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;}
+  .badge{font-size:11px; padding:2px 8px; border-radius:999px; font-weight:600;}
+  .lvl-初级{background:#e5f6e8; color:#1c7f37;}
+  .lvl-中级{background:#fff4e0; color:#b26a00;}
+  .lvl-高级{background:#fdecec; color:#c62828;}
+  .focus{background:#eef0fb; color:#4a4ac0;}
+  .score-best{font-size:12px; color:var(--accent); font-weight:700; white-space:nowrap;}
+
+  /* 自定义 */
+  #custom-area{width:100%; min-height:110px; border:1px solid var(--line); border-radius:12px;
+    padding:12px; font-size:14px; font-family:inherit; resize:vertical;}
+  #custom-area:focus{outline:none; border-color:var(--accent);}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; border:none; border-radius:12px;
+    padding:10px 18px; font-size:14px; font-weight:700; cursor:pointer; transition:.15s;
+    font-family:inherit;
+  }
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-ghost{background:#fff; color:var(--text); border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--accent); color:var(--accent);}
+  .btn-small{padding:7px 12px; font-size:13px;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+
+  /* 练习区 */
+  .topbar{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+  .progress{flex:1; text-align:center; font-weight:700; color:var(--muted);}
+  .progress b{color:var(--accent); font-size:18px;}
+  .player{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:8px 0 14px;}
+  .play-big{font-size:16px; padding:12px 22px;}
+  .ctrl{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted);}
+  .ctrl select{border:1px solid var(--line); border-radius:8px; padding:5px 8px; font-size:13px; font-family:inherit; background:#fff;}
+  .playing{color:var(--accent); font-size:13px; font-weight:700; animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.35;}}
+  textarea#input{
+    width:100%; min-height:90px; border:1px solid var(--line); border-radius:12px;
+    padding:14px; font-size:16px; font-family:inherit; resize:vertical; line-height:1.7;
+  }
+  textarea#input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(91,91,214,.12);}
+  .actions{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+  .hint{font-size:12px; color:var(--muted); margin-top:10px;}
+
+  /* 结果 */
+  #result{margin-top:16px; border-top:1px dashed var(--line); padding-top:16px;}
+  .score-banner{display:flex; align-items:center; gap:14px; margin-bottom:14px;}
+  .score-ring{
+    width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:18px; color:#fff; flex-shrink:0;
+  }
+  .score-msg{font-size:14px; color:var(--muted);}
+  .answer-line{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
+  .chip{
+    display:inline-flex; flex-direction:column; align-items:center; border-radius:8px;
+    padding:4px 9px; font-size:14px; line-height:1.3;
+  }
+  .chip b{font-weight:600;}
+  .chip i{font-style:normal; font-size:11px; opacity:.8; margin-top:1px;}
+  .chip.ok{background:var(--ok-bg); color:var(--ok-text);}
+  .chip.miss{background:var(--bad-bg); color:var(--bad-text);}
+  .chip.extra{background:#f0f1f5; color:var(--muted); text-decoration:line-through;}
+  .label-line{font-size:12px; color:var(--muted); margin-top:12px; font-weight:700;}
+  .extra-line{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;}
+  .nav{display:flex; gap:10px; margin-top:20px;}
+  .nav .spacer{flex:1;}
+
+  /* 成绩页 */
+  .big-score{text-align:center; padding:10px 0;}
+  .big-score .num{font-size:56px; font-weight:800; color:var(--accent); line-height:1;}
+  .big-score .lbl{color:var(--muted); margin-top:6px;}
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0;}
+  .stat{background:var(--bg); border-radius:12px; padding:12px; text-align:center;}
+  .stat .v{font-size:20px; font-weight:800;}
+  .stat .k{font-size:12px; color:var(--muted);}
+  .per-sentence{display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid var(--line); font-size:13px;}
+  .per-sentence:last-child{border-bottom:none;}
+  .per-sentence .idx{color:var(--muted); width:26px; flex-shrink:0; font-weight:700;}
+  .per-sentence .txt{flex:1; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .dot{width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .dot.g{background:#34a853;} .dot.r{background:#ea4335;} .dot.y{background:#fbbc04;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎧 尚雯婕听写法</h1>
+    <div class="sub">精听 · 听写 · 跟读 —— <b>一篇吃透，胜过十篇</b></div>
+  </header>
+
+  <!-- 首页 -->
+  <section id="home">
+    <div class="card">
+      <h2>怎么练</h2>
+      <div class="steps">
+        <span data-n="1">点「播放本句」，听一句英语（语速、口音可调）</span>
+        <span data-n="2">把你听到的写进输入框，听不清就反复重听</span>
+        <span data-n="3">点「提交核对」，逐词对照，看自己错在哪</span>
+        <span data-n="4">跟着原声大声朗读，直到能流利背诵再换下一句</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>选择一篇开始</h2>
+      <div class="passage-list" id="passage-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>✍️ 自定义文本</h2>
+      <p class="hint" style="margin:0 0 10px;">粘贴任意英文，点「开始」即可练习（也可用来练课文、演讲稿）</p>
+      <textarea id="custom-area" placeholder="在这里粘贴英文文本…&#10;多个句子用句号分隔。"></textarea>
+      <div class="actions" style="margin-top:12px;">
+        <button class="btn btn-primary" id="custom-start">开始练习</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 练习页 -->
+  <section id="practice" class="hidden">
+    <div class="topbar">
+      <button class="btn btn-ghost btn-small" id="back-btn">← 返回</button>
+      <div class="progress">第 <b id="cur">1</b> / <span id="total">5</span> 句</div>
+      <span class="badge focus" id="focus-tag"></span>
+    </div>
+    <div class="card">
+      <h2 id="passage-title"></h2>
+      <div class="player">
+        <button class="btn btn-primary play-big" id="play-btn">🔊 播放本句</button>
+        <span class="playing hidden" id="playing">正在播放…</span>
+        <div class="ctrl">语速
+          <select id="rate">
+            <option value="0.5">0.5× 慢速</option>
+            <option value="0.65">0.65×</option>
+            <option value="0.8" selected>0.8×</option>
+            <option value="1">1× 常速</option>
+          </select>
+        </div>
+        <div class="ctrl">口音
+          <select id="accent">
+            <option value="en-US" selected>美音 🇺🇸</option>
+            <option value="en-GB">英音 🇬🇧</option>
+          </select>
+        </div>
+      </div>
+      <textarea id="input" placeholder="听到什么就写什么…（按 Enter 提交核对）"></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" id="check-btn">✅ 提交核对</button>
+        <button class="btn btn-ghost" id="reveal-btn">👁 显示答案</button>
+        <button class="btn btn-ghost" id="skip-btn">⏭ 跳过</button>
+      </div>
+      <div id="result" class="hidden"></div>
+      <div class="nav">
+        <button class="btn btn-ghost" id="prev-btn">← 上一句</button>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" id="next-btn">下一句 →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 成绩页 -->
+  <section id="summary" class="hidden">
+    <div class="card">
+      <h2>🎉 练习完成</h2>
+      <div class="big-score">
+        <div class="num" id="sum-score">0%</div>
+        <div class="lbl">总正确率</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><div class="v" id="sum-correct">0</div><div class="k">正确词数</div></div>
+        <div class="stat"><div class="v" id="sum-total">0</div><div class="k">总词数</div></div>
+      </div>
+      <h2 style="margin-top:18px;">逐句成绩</h2>
+      <div id="per-sentence"></div>
+      <div class="actions" style="margin-top:18px;">
+        <button class="btn btn-primary" id="retry-btn">🔄 再练一遍</button>
+        <button class="btn btn-ghost" id="home-btn">返回列表</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const PASSAGES = [
+  {id:"p1", title:"我的早晨", level:"初级", focus:"日常口语",
+   en:"I get up at seven every morning. First, I wash my face and brush my teeth. Then I eat a simple breakfast with my family. After that, I walk to the bus stop near my home. The bus is never late on sunny days.",
+   zh:"我每天早上七点起床。先洗脸刷牙。然后和家人吃一顿简单的早餐。之后我走到家附近的公交站。晴天时公交车从不迟到。"},
+  {id:"p2", title:"我的宠物", level:"初级", focus:"日常口语",
+   en:"I have a small white cat. Her name is Snow. She sleeps on my bed at night. In the day, she likes to sit by the window. She makes me happy when I feel sad.",
+   zh:"我有一只小白猫。她叫雪球。晚上她睡在我的床上。白天她喜欢坐在窗边。当我难过时，她会让我开心起来。"},
+  {id:"p3", title:"周末计划", level:"初级", focus:"日常口语",
+   en:"This weekend I want to stay home and rest. On Saturday I will cook a big lunch. On Sunday I plan to read a new book. Maybe I will call my old friend too. I hope the weather is nice for a short walk.",
+   zh:"这个周末我想待在家里休息。周六我要做一顿丰盛的午餐。周日我打算读一本新书。也许我还会给老朋友打个电话。我希望天气好，可以出去走走。"},
+  {id:"p4", title:"城市生活", level:"中级", focus:"连读",
+   en:"Living in a big city has both good sides and bad sides. You can find a job easily and meet many interesting people. But the traffic is heavy, and the cost of living is high. Sometimes I wish I could live in a quiet town by the sea.",
+   zh:"在大城市生活有好处也有坏处。你可以轻松找到工作，认识许多有趣的人。但交通拥堵，生活成本也高。有时我希望自己能住在海边安静的小镇。"},
+  {id:"p5", title:"健康饮食", level:"中级", focus:"弱读",
+   en:"Eating well is not as hard as many people think. You do not need to buy expensive food. Just add more fruit and vegetables to your meals. Drink enough water and eat less sugar. Small changes can make a big difference over time.",
+   zh:"吃得好并不像很多人想的那么难。你不需要买昂贵的食物。只要在餐食里多加些水果和蔬菜。多喝水、少吃糖。小的改变日积月累会带来很大的不同。"},
+  {id:"p6", title:"一次难忘的旅行", level:"中级", focus:"数字与日期",
+   en:"Last summer I took a trip to Yunnan with two friends. We left on the third of July and came back ten days later. The train tickets cost about two hundred yuan each. The mountains there were the most beautiful thing I have ever seen. I took over a thousand photos on that trip.",
+   zh:"去年夏天我和两个朋友去云南旅行。我们七月三号出发，十天后回来。火车票每人约两百元。那里的山是我见过最美的风景。那次旅行我拍了一千多张照片。"},
+  {id:"p7", title:"网上学习", level:"中级", focus:"比较与对比",
+   en:"Learning online is different from learning in a classroom. Online courses are more flexible, so you can study at your own speed. But you may miss the support of a real teacher. In the classroom, it is easier to ask questions and make friends. Both ways have their own strengths and weaknesses.",
+   zh:"网上学习和在教室里学习是不同的。网课更灵活，你可以按自己的节奏学。但你可能会失去真实老师的支持。在教室里，提问和交朋友更容易。两种方式各有优缺点。"},
+  {id:"p8", title:"终身学习", level:"高级", focus:"学术词汇",
+   en:"In a rapidly changing world, the ability to keep learning has become essential. People who stop acquiring new skills may find themselves left behind. Formal education gives us a foundation, but real growth often comes from curiosity and practice. Therefore, we should treat every challenge as a chance to improve.",
+   zh:"在快速变化的世界里，持续学习的能力变得至关重要。停止获取新技能的人可能会发现自己落后了。正规教育为我们打下基础，但真正的成长往往来自好奇心和实践。因此，我们应把每一次挑战都当作提升的机会。"},
+  {id:"p9", title:"人工智能与未来", level:"高级", focus:"长句",
+   en:"Artificial intelligence is changing the way we live and work at a surprising speed. Many simple jobs are now done by machines, which makes some people worry about the future. However, new technology has always created new kinds of work as well. The key is to keep an open mind and be ready to learn new things throughout our lives.",
+   zh:"人工智能正以惊人的速度改变我们的生活和工作的方式。许多简单的工作现在由机器完成，这让一些人对未来感到担忧。然而，新技术也总是创造出新的工作类型。关键是保持开放的心态，并做好终身学习新事物的准备。"},
+  {id:"p10", title:"环境保护", level:"高级", focus:"商务表达",
+   en:"Protecting the environment is no longer a choice but a responsibility for every company and every person. Reducing waste, saving energy, and using clean power are steps we can all take today. Governments should make clear rules, while businesses should follow them honestly. Only by working together can we leave a healthy planet to the next generation.",
+   zh:"保护环境已不再是一种选择，而是每个企业和每个人的责任。减少浪费、节约能源、使用清洁能源，这些都是我们今天就能采取的行动。政府应当制定明确的规则，企业则应诚实地遵守。只有携手合作，我们才能给下一代留下一个健康的地球。"}
+];
+
+const $ = id => document.getElementById(id);
+const homeEl=$('home'), practiceEl=$('practice'), summaryEl=$('summary');
+const inputEl=$('input'), resultEl=$('result');
+
+/* ---------- 语音 ---------- */
+let voices=[];
+function loadVoices(){ voices = speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('en')); }
+if ('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+
+/* ---------- 状态 ---------- */
+const state = { passage:null, sentences:[], idx:0, rate:0.8, accent:'en-US' };
+
+/* ---------- 工具 ---------- */
+function toWords(text){
+  return (text.toLowerCase()
+    .replace(/[’‘]/g,"'")
+    .replace(/'/g,'')
+    .replace(/[^a-z0-9\s-]/g,' ')
+    .split(/\s+/)
+    .map(w=>w.replace(/^-+|-+$/g,''))
+    .filter(Boolean));
+}
+function splitSentences(text){
+  const clean = text.replace(/\s+/g,' ').trim();
+  return (clean.match(/[^.!?]+[.!?]+/g) || [clean]).map(s=>s.trim()).filter(Boolean);
+}
+function diff(correct, user){
+  const m=correct.length, n=user.length;
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=m-1;i>=0;i--) for(let j=n-1;j>=0;j--)
+    dp[i][j] = correct[i]===user[j] ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j], dp[i][j+1]);
+  const ops=[]; let i=0,j=0;
+  while(i<m && j<n){
+    if(correct[i]===user[j]){ ops.push({t:'ok',c:correct[i]}); i++; j++; }
+    else if(dp[i+1][j]>=dp[i][j+1]){ ops.push({t:'miss',c:correct[i]}); i++; }
+    else{ ops.push({t:'extra',u:user[j]}); j++; }
+  }
+  while(i<m) ops.push({t:'miss',c:correct[i++]});
+  while(j<n) ops.push({t:'extra',u:user[j++]});
+  return ops;
+}
+function scoreOf(ops){ const ok=ops.filter(o=>o.t==='ok').length; return ok/ops.filter(o=>o.t==='ok'||o.t==='miss').length; }
+function pct(x){ return Math.round(x*100); }
+
+/* ---------- 本地进度 ---------- */
+const KEY='swj-dictation-v1';
+function loadProgress(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function saveProgress(){
+  const p = loadProgress();
+  if(!p[state.passage.id]) p[state.passage.id]={};
+  const sent = state.sentences.map(s=>({score:s.score, checked:s.checked}));
+  p[state.passage.id].sentences = sent;
+  const checked = sent.filter(s=>s.checked);
+  const best = p[state.passage.id].best || 0;
+  const cur = checked.length ? pct(checked.reduce((a,s)=>a+(s.score||0),0)/checked.length) : 0;
+  p[state.passage.id].best = Math.max(best, cur);
+  p[state.passage.id].done = state.sentences.every(s=>s.checked);
+  localStorage.setItem(KEY, JSON.stringify(p));
+}
+
+/* ---------- 首页 ---------- */
+function renderHome(){
+  const list=$('passage-list'); list.innerHTML='';
+  const prog = loadProgress();
+  PASSAGES.forEach(p=>{
+    const d=document.createElement('button');
+    d.className='passage';
+    const best = prog[p.id] && prog[p.id].best ? prog[p.id].best : null;
+    const done = prog[p.id] && prog[p.id].done;
+    d.innerHTML =
+      '<div class="meta">'+
+        '<div class="title">'+p.title+'</div>'+
+        '<div class="tags">'+
+          '<span class="badge lvl-'+p.level+'">'+p.level+'</span>'+
+          '<span class="badge focus">'+p.focus+'</span>'+
+          '<span class="badge" style="background:#f0f1f5;color:#7a7f95">'+splitSentences(p.en).length+' 句</span>'+
+        '</div>'+
+      '</div>'+
+      (best!==null ? '<span class="score-best">'+(done?'✅ 已完成 · ':'')+'最佳 '+best+'%</span>' : '');
+    d.onclick=()=>startPassage(p.id);
+    list.appendChild(d);
+  });
+}
+
+function startPassage(id){
+  const p = PASSAGES.find(x=>x.id===id);
+  state.passage = p;
+  state.sentences = splitSentences(p.en).map(t=>({text:t, user:'', checked:false, score:0, ops:null}));
+  state.idx = 0;
+  showPractice();
+}
+function startCustom(){
+  const txt = $('custom-area').value.trim();
+  if(!txt){ alert('先粘贴一段英文文本吧～'); return; }
+  state.passage = {id:'custom', title:'自定义文本', level:'自定义', focus:'自由练习', en:txt};
+  state.sentences = splitSentences(txt).map(t=>({text:t, user:'', checked:false, score:0, ops:null}));
+  if(!state.sentences.length){ alert('没有识别到句子，请用句号分隔。'); return; }
+  state.idx = 0;
+  showPractice();
+}
+
+/* ---------- 练习页 ---------- */
+function showPractice(){
+  homeEl.classList.add('hidden'); summaryEl.classList.add('hidden'); practiceEl.classList.remove('hidden');
+  $('passage-title').textContent = state.passage.title;
+  const f=$('focus-tag'); f.textContent = state.passage.focus==='自由练习' ? '自定义' : state.passage.focus;
+  $('total').textContent = state.sentences.length;
+  loadSentence();
+}
+function loadSentence(){
+  $('cur').textContent = state.idx+1;
+  const s = state.sentences[state.idx];
+  inputEl.value = s.user || '';
+  resultEl.classList.add('hidden'); resultEl.innerHTML='';
+  $('reveal-btn').disabled = false;
+  $('prev-btn').disabled = state.idx===0;
+  $('next-btn').textContent = state.idx===state.sentences.length-1 ? '🏁 完成' : '下一句 →';
+  updatePlaying(false);
+}
+function saveInput(){ state.sentences[state.idx].user = inputEl.value.trim(); }
+
+function speak(){
+  if(!('speechSynthesis' in window)){ alert('当前浏览器不支持语音朗读，请用 Chrome / Edge 打开。'); return; }
+  const s = state.sentences[state.idx].text;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(s);
+  u.lang = state.accent; u.rate = parseFloat(state.rate);
+  const v = voices.find(v=>v.lang.toLowerCase().startsWith(state.accent.toLowerCase())) || voices[0];
+  if(v) u.voice = v;
+  updatePlaying(true);
+  u.onend = u.onerror = ()=>updatePlaying(false);
+  speechSynthesis.speak(u);
+}
+function updatePlaying(on){ const el=$('playing'); el.classList.toggle('hidden', !on); }
+
+function check(){
+  saveInput();
+  const s = state.sentences[state.idx];
+  if(!s.user){ alert('先写点什么再核对吧～'); return; }
+  const cWords=toWords(s.text), uWords=toWords(s.user);
+  if(!cWords.length){ alert('这个句子没有可判分的单词。'); return; }
+  s.ops = diff(cWords, uWords);
+  s.score = scoreOf(s.ops);
+  s.checked = true;
+  renderResult(s);
+  saveProgress();
+}
+function reveal(){
+  const s = state.sentences[state.idx];
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = '<div class="label-line">📖 参考答案（跟读模仿）</div>'+
+    '<div class="answer-line">'+toWords(s.text).map(w=>'<span class="chip ok"><b>'+w+'</b></span>').join('')+'</div>'+
+    '<div class="score-msg" style="margin-top:8px;">🔊 点「播放本句」跟着大声朗读，模仿语音语调。</div>';
+}
+
+function wordChip(op){
+  if(op.t==='ok') return '<span class="chip ok"><b>'+op.c+'</b></span>';
+  if(op.t==='miss'){
+    const sub = op.wrong ? '你写: '+op.wrong : '漏写';
+    return '<span class="chip miss"><b>'+op.c+'</b><i>'+sub+'</i></span>';
+  }
+  return '<span class="chip extra"><b>'+op.u+'</b></span>';
+}
+function renderResult(s){
+  const score = pct(s.score);
+  resultEl.classList.remove('hidden');
+  let html = '<div class="score-banner">'+
+    '<div class="score-ring" style="background:'+(score>=90?'#34a853':score>=60?'#fbbc04':'#ea4335')+'">'+score+'%</div>'+
+    '<div class="score-msg">'+(score===100?'💯 完美！全对，继续跟读巩固。':score>=90?'👏 很棒！再跟读几遍就熟了。':score>=60?'🔁 有错很正常，看下红词错在哪，重听重写。':'💪 这句子有点难，多听几遍，对照答案再写一次。')+'</div>'+
+  '</div>';
+
+  // 参考答案行：按顺序着色，miss 与紧跟的 extra 配对显示
+  const ops = s.ops, extras=[];
+  const line=[];
+  let i=0;
+  while(i<ops.length){
+    const op=ops[i];
+    if(op.t==='ok'){ line.push(wordChip(op)); i++; }
+    else if(op.t==='miss'){
+      let wrong=null;
+      if(ops[i+1] && ops[i+1].t==='extra'){ wrong=ops[i+1].u; i++; }
+      line.push(wordChip({t:'miss',c:op.c,wrong})); i++;
+    } else { extras.push(op.u); i++; }
+  }
+  html += '<div class="label-line">✅ 参考答案</div><div class="answer-line">'+line.join('')+'</div>';
+  if(extras.length) html += '<div class="label-line">➕ 多余词（你多写的）</div><div class="extra-line">'+extras.map(w=>'<span class="chip extra"><b>'+w+'</b></span>').join('')+'</div>';
+  if(state.passage.zh) html += '<div class="label-line">🌐 中文翻译</div><div class="score-msg" style="color:var(--text);">'+state.passage.zh+'</div>';
+  resultEl.innerHTML = html;
+}
+
+function go(delta){
+  saveInput();
+  const next = state.idx+delta;
+  if(next<0 || next>=state.sentences.length){
+    if(next>=state.sentences.length) finish();
+    return;
+  }
+  state.idx = next;
+  loadSentence();
+}
+function finish(){
+  saveInput(); saveProgress();
+  showSummary();
+}
+
+/* ---------- 成绩页 ---------- */
+function showSummary(){
+  practiceEl.classList.add('hidden'); homeEl.classList.add('hidden'); summaryEl.classList.remove('hidden');
+  const checked = state.sentences.filter(s=>s.checked);
+  const okWords = checked.reduce((a,s)=>a+s.ops.filter(o=>o.t==='ok').length,0);
+  const totWords = checked.reduce((a,s)=>a+s.ops.filter(o=>o.t==='ok'||o.t==='miss').length,0);
+  const overall = totWords ? pct(okWords/totWords) : 0;
+  $('sum-score').textContent = overall+'%';
+  $('sum-correct').textContent = okWords;
+  $('sum-total').textContent = totWords;
+  const per=$('per-sentence'); per.innerHTML='';
+  state.sentences.forEach((s,idx)=>{
+    const d=document.createElement('div'); d.className='per-sentence';
+    const dot = !s.checked ? 'y' : (s.score>=0.9 ? 'g' : 'r');
+    d.innerHTML = '<span class="idx">'+(idx+1)+'</span>'+
+      '<span class="txt">'+s.text+'</span>'+
+      '<span class="dot '+dot+'"></span>'+
+      (s.checked ? '<span style="font-weight:700;color:var(--muted);width:44px;text-align:right;">'+pct(s.score)+'%</span>' : '<span style="color:var(--muted);font-size:12px;">未做</span>');
+    d.onclick=()=>{ state.idx=idx; showPractice(); };
+    d.style.cursor='pointer';
+    per.appendChild(d);
+  });
+}
+
+/* ---------- 事件绑定 ---------- */
+$('play-btn').onclick = speak;
+$('check-btn').onclick = check;
+$('reveal-btn').onclick = reveal;
+$('skip-btn').onclick = ()=>{ const s=state.sentences[state.idx]; s.checked=false; go(1); };
+$('prev-btn').onclick = ()=>go(-1);
+$('next-btn').onclick = ()=>go(1);
+$('back-btn').onclick = ()=>{ saveInput(); homeEl.classList.remove('hidden'); practiceEl.classList.add('hidden'); summaryEl.classList.add('hidden'); renderHome(); };
+function restart(){
+  state.sentences = splitSentences(state.passage.en).map(t=>({text:t, user:'', checked:false, score:0, ops:null}));
+  state.idx = 0;
+  showPractice();
+}
+$('retry-btn').onclick = restart;
+$('home-btn').onclick = ()=>{ summaryEl.classList.add('hidden'); homeEl.classList.remove('hidden'); renderHome(); };
+$('custom-start').onclick = startCustom;
+$('rate').onchange = e=>state.rate=e.target.value;
+$('accent').onchange = e=>state.accent=e.target.value;
+inputEl.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); check(); }
+});
+
+renderHome();
+</script>
+</body>
+</html>
