@@ -129,6 +129,23 @@
   .per-sentence .txt{flex:1; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .dot{width:10px; height:10px; border-radius:50%; flex-shrink:0;}
   .dot.g{background:#34a853;} .dot.r{background:#ea4335;} .dot.y{background:#fbbc04;}
+
+  /* 复盘弹窗 */
+  .overlay{position:fixed; inset:0; background:rgba(20,24,60,.5); display:flex; align-items:center; justify-content:center; z-index:60; padding:16px;}
+  .recap-card{background:var(--card); border-radius:18px; max-width:600px; width:100%; max-height:84vh; overflow:auto; padding:22px; box-shadow:0 12px 40px rgba(20,24,60,.25);}
+  .recap-head{display:flex; align-items:center; justify-content:space-between; font-size:18px; font-weight:800;}
+  .recap-sub{color:var(--muted); font-size:13px; margin-top:2px;}
+  .recap-stats{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:14px 0;}
+  .recap-stat{background:var(--bg); border-radius:12px; padding:10px; text-align:center;}
+  .recap-stat .v{font-size:20px; font-weight:800; color:var(--accent); line-height:1.2;}
+  .recap-stat .k{font-size:11px; color:var(--muted); margin-top:2px;}
+  .recap-words{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .recap-word{background:#eef0fb; border-radius:10px; padding:6px 10px; font-size:13px; line-height:1.5;}
+  .recap-word b{color:var(--accent); font-size:14px;}
+  .recap-word span{color:var(--text);}
+  .recap-word i{font-style:normal; color:var(--muted); font-size:11px; display:block;}
+  .recap-empty{color:var(--muted); font-size:14px; padding:6px 0;}
+  .recap-tip{font-size:13px; color:var(--muted); margin-top:12px; border-top:1px dashed var(--line); padding-top:10px;}
 </style>
 </head>
 <body>
@@ -227,6 +244,20 @@
       </div>
     </div>
   </section>
+</div>
+
+<div class="overlay hidden" id="recap-overlay">
+  <div class="recap-card">
+    <div class="recap-head">
+      <span>📝 今日复盘</span>
+      <button class="btn btn-ghost btn-small" id="recap-close">✕ 关闭</button>
+    </div>
+    <p class="recap-sub">花 5 分钟回顾今天学到的</p>
+    <div class="recap-stats" id="recap-stats"></div>
+    <div class="label-line">今日错词 · 读 3 遍 + 遮中文回想</div>
+    <div class="recap-words" id="recap-words"></div>
+    <p class="recap-tip" id="recap-tip"></p>
+  </div>
 </div>
 
 <script>
@@ -1027,6 +1058,48 @@ function saveProgress(){
   p[state.passage.id].done = state.sentences.every(s=>s.checked);
   localStorage.setItem(KEY, JSON.stringify(p));
 }
+const MK='swj-mistakes-v1', DK='swj-daily-v1';
+function loadMistakes(){ try{ return JSON.parse(localStorage.getItem(MK))||[]; }catch(e){ return []; } }
+function saveMistakes(a){ localStorage.setItem(MK, JSON.stringify(a)); }
+function loadDaily(){ try{ return JSON.parse(localStorage.getItem(DK))||{}; }catch(e){ return {}; } }
+function saveDaily(d){ localStorage.setItem(DK, JSON.stringify(d)); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function logCheck(s){
+  const t = today();
+  const ok = s.ops.filter(o=>o.t==='ok').length;
+  const d = loadDaily();
+  if(!d[t]) d[t] = {ok:0, total:0, passages:[]};
+  d[t].ok += ok;
+  d[t].total += s.ops.filter(o=>o.t==='ok'||o.t==='miss').length;
+  if(!d[t].passages.includes(state.passage.title)) d[t].passages.push(state.passage.title);
+  saveDaily(d);
+  const log = loadMistakes();
+  s.ops.forEach(o=>{
+    if(o.t==='miss'){
+      const k = t+'|'+o.c;
+      if(!log.some(x=>x.k===k)) log.push({k, d:t, w:o.c, p:state.passage.title});
+    }
+  });
+  saveMistakes(log);
+}
+function showRecap(){
+  const t = today();
+  const daily = loadDaily()[t] || {ok:0, total:0, passages:[]};
+  const wrong = loadMistakes().filter(x=>x.d===t);
+  const acc = daily.total ? Math.round(daily.ok/daily.total*100) : 0;
+  $('recap-stats').innerHTML =
+    '<div class="recap-stat"><div class="v">'+daily.passages.length+'</div><div class="k">今日完成篇数</div></div>'+
+    '<div class="recap-stat"><div class="v">'+daily.total+'</div><div class="k">今日听写词数</div></div>'+
+    '<div class="recap-stat"><div class="v">'+acc+'%</div><div class="k">今日正确率</div></div>'+
+    '<div class="recap-stat"><div class="v">'+wrong.length+'</div><div class="k">今日错词</div></div>';
+  $('recap-words').innerHTML = wrong.length
+    ? wrong.map(x=>'<div class="recap-word"><b>'+x.w+'</b> <span>'+(gloss(x.w)||'')+'</span><i>来自：'+x.p+'</i></div>').join('')
+    : '<div class="recap-empty">🎉 今天还没有错词，继续保持！</div>';
+  $('recap-tip').textContent = wrong.length
+    ? '💡 花 5 分钟：把每个词大声读 3 遍，再遮住中文回想释义，直到脱口而出。'
+    : '💡 明天再来一篇，稳定积累～';
+  $('recap-overlay').classList.remove('hidden');
+}
 
 /* ---------- 首页 ---------- */
 function renderHome(){
@@ -1119,6 +1192,7 @@ function check(){
   s.ops = diff(cWords, uWords);
   s.score = scoreOf(s.ops);
   s.checked = true;
+  logCheck(s);
   renderResult(s);
   saveProgress();
 }
@@ -1202,6 +1276,7 @@ function go(delta){
 function finish(){
   saveInput(); saveProgress();
   showSummary();
+  showRecap();
 }
 
 /* ---------- 成绩页 ---------- */
@@ -1249,6 +1324,9 @@ $('accent').onchange = e=>state.accent=e.target.value;
 inputEl.addEventListener('keydown', e=>{
   if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); check(); }
 });
+
+$('recap-close').onclick = ()=>$('recap-overlay').classList.add('hidden');
+$('recap-overlay').addEventListener('click', e=>{ if(e.target.id==='recap-overlay') e.target.classList.add('hidden'); });
 
 renderHome();
 </script>
