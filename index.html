@@ -114,6 +114,8 @@
   .pchip{display:inline-block; padding:0 5px; border-radius:6px; margin:0 2px; font-weight:600;}
   .pchip.ok{color:var(--ok-text);}
   .pchip.miss{color:var(--bad-text); background:var(--bad-bg);}
+  .compare-banner{display:flex; align-items:center; justify-content:space-between; gap:12px; background:#eef0fb; border:1px solid #c7cdf5; border-radius:12px; padding:12px 14px; margin-top:12px; font-size:14px; color:var(--text);}
+  .compare-banner b{color:var(--accent); font-size:20px;}
   .chip.ok{background:var(--ok-bg); color:var(--ok-text);}
   .chip.miss{background:var(--bad-bg); color:var(--bad-text);}
   .chip.extra{background:#f0f1f5; color:var(--muted); text-decoration:line-through;}
@@ -224,6 +226,10 @@
         <button class="btn btn-ghost" id="skip-btn">⏭ 跳过</button>
       </div>
       <div id="result" class="hidden"></div>
+      <div id="compare-banner" class="hidden">
+        <span>📖 对照一下你的答案 —— <b id="compare-count">30</b> 秒后自动重新听写</span>
+        <button class="btn btn-primary btn-small" id="compare-now">立即重写</button>
+      </div>
       <div class="nav">
         <button class="btn btn-ghost" id="prev-btn">← 上一句</button>
         <div class="spacer"></div>
@@ -399,7 +405,47 @@ const PASSAGES = [
   {id:"p40", title:"学习vlog", level:"高级", focus:"日常口语",
    en:"Hi there, and welcome to a new study with me video. This week I have been preparing for an important exam that is coming up next month. I find that studying in short blocks works much better for me than studying all day. Every forty minutes, I take a five minute break to rest my eyes and drink some water. I also keep a notebook where I write down every word that I do not know. By the end of the day, I feel that I have learned something valuable.",
    zh:"大家好，欢迎来到新的「和我一起学习」视频。这周我一直在为下个月即将到来的一场重要考试做准备。我发现分小段时间学习比整天学习效果好得多。每四十分钟，我就休息五分钟，让眼睛放松、喝点水。我还准备了一个笔记本，把不认识的词都写下来。一天结束时，我觉得自己学到了有价值的东西。",
-   grammar:["问候语 hi there","现在完成进行时 have been preparing + 定语从句 that is coming up","宾语从句 find that + 动名词 studying + 比较级 better than","频率表达 every forty minutes + 不定式 to rest","定语从句 where + 定语从句 that I do not know","时间状语 by the end of + 宾语从句 feel that + 现在完成时 have learned"]}
+   grammar:["问候语 hi there","现在完成进行时 have been preparing + 定语从句 that is coming up","宾语从句 find that + 动名词 studying + 比较级 better than","频率表达 every forty minutes + 不定式 to rest","定语从句 where + 定语从句 that I do not know","时间状语 by the end of + 宾语从句 feel that + 现在完成时 have learned"]},
+  {id:"p41", title:"体育新闻", level:"高级", focus:"长句",
+   en:"The national football team won its final match of the season last night. The players scored three goals in the second half to turn the game around. Thousands of fans stayed in the stadium long after the final whistle. The coach said the team had worked harder than ever this year. Next month, the players will begin training for the international tournament. Many believe they have a real chance to win the title.",
+   zh:"国家足球队昨晚赢得了本赛季的最后一场比赛。球员们在下半场连进三球，扭转了局面。终场哨响后，数千名球迷仍在球场里久久不愿离开。教练说，球队今年比以往任何时候都更加努力。下个月，球员们将开始为国际锦标赛训练。许多人相信他们真的有夺冠的机会。",
+   grammar:["一般过去时 won","一般过去时 scored + 不定式 to turn","一般过去时 stayed + 时间状语 after","宾语从句 said + 过去完成时 had worked + 比较级 harder than","一般将来时 will begin + 动名词 training","宾语从句 believe + 不定式 to win"]},
+  {id:"p42", title:"健康新闻", level:"高级", focus:"学术词汇",
+   en:"A recent study has shown that walking just ten minutes a day can improve your health. Researchers followed over five thousand adults for a period of eight years. They found that people who walked regularly had a lower risk of heart disease. Even short walks during lunch breaks made a clear difference. The authors of the study suggest starting with small goals and building up slowly. They believe that any movement is better than none.",
+   zh:"一项近期研究表明，每天仅步行十分钟就能改善健康。研究人员对五千多名成年人进行了为期八年的跟踪。他们发现，经常步行的人患心脏病的风险更低。即使午休时间的短暂散步也能带来明显改变。这项研究的作者建议从小目标开始，逐步增加。他们认为，任何运动都比不运动好。",
+   grammar:["现在完成时 has shown + 宾语从句 + 情态动词 can","一般过去时 followed + 时间段","宾语从句 found + 定语从句 who walked + 比较级 lower","让步 even + 一般过去时 made","动名词 starting/building 作宾语","宾语从句 believe + 比较级 better than"]},
+  {id:"p43", title:"教育新闻", level:"高级", focus:"学术词汇",
+   en:"The government has announced plans to build one hundred new schools in rural areas. The project will cost more than a billion yuan and take five years to complete. Officials say the new schools will provide better education for millions of children. Many teachers have already volunteered to move to these areas. The program also includes training for local teachers and free textbooks for students. Parents have welcomed the news, saying it gives their children real hope.",
+   zh:"政府宣布计划在农村地区新建一百所学校。该项目耗资超过十亿元，需要五年才能完成。官员们表示，新学校将为数百万儿童提供更好的教育。许多教师已经自愿搬到这些地区。该计划还包括为当地教师提供培训、为学生提供免费教材。家长们对这一消息表示欢迎，称这给他们的孩子带来了真正的希望。",
+   grammar:["现在完成时 has announced + 不定式 to build","一般将来时 will cost + 比较级 more than","宾语从句 say + 一般将来时 will provide","现在完成时 have volunteered + 不定式 to move","一般现在时 includes + 动名词 training","现在完成时 have welcomed + 现在分词 saying + 宾语从句"]},
+  {id:"p44", title:"娱乐新闻", level:"高级", focus:"长句",
+   en:"A young singer from a small town has become famous almost overnight. Her first song was played more than fifty million times in a single week. Fans around the world have praised her unique voice and honest lyrics. Music critics say she has brought fresh energy to the industry. The singer plans to release her first full album before the end of the year. She says she will not forget where she came from.",
+   zh:"一位来自小镇的年轻歌手几乎一夜成名。她的第一首歌在一周内被播放了五千多万次。世界各地的歌迷都称赞她独特的嗓音和真诚的歌词。乐评人说，她给这个行业带来了新鲜的活力。这位歌手计划在年底前发行她的第一张完整专辑。她说她不会忘记自己来自哪里。",
+   grammar:["现在完成时 has become + 副词 almost","被动语态 was played + 比较级 more than","现在完成时 have praised + 并列","宾语从句 say + 现在完成时 has brought","不定式 to release + 时间状语 before","宾语从句 says + 一般将来时 will not forget + 宾语从句 where"]},
+  {id:"p45", title:"太空探索", level:"高级", focus:"学术词汇",
+   en:"Scientists have discovered a new planet that may be able to support life. The planet is about the same size as Earth and lies in the right position from its star. Researchers used powerful telescopes to study its atmosphere for the first time. They found gases that could be produced by living things. More observations are needed before any final conclusions can be made. The team plans to publish its full findings in a leading journal next month.",
+   zh:"科学家发现了一颗可能能够支持生命的新行星。这颗行星的大小与地球差不多，并且位于距离其恒星恰当的位置。研究人员首次使用强大的望远镜研究它的大气层。他们发现了可能由生物产生的气体。在得出任何最终结论之前，还需要更多观测。该团队计划下个月在一家顶级期刊上发表完整的研究成果。",
+   grammar:["现在完成时 have discovered + 定语从句 that + 情态动词 may","系表 be + 同级比较 the same as + 并列","一般过去时 used + 不定式 to study","宾语从句 found + 定语从句 that could be produced（被动）","被动语态 are needed + before 从句","不定式 to publish + 时间状语 next month"]},
+  {id:"p46", title:"宠物vlog", level:"高级", focus:"日常口语",
+   en:"Hey guys, today I want to introduce you to my dog, a golden retriever named Lucky. He has been with our family for almost three years now. Every morning, he wakes me up by jumping onto my bed and licking my face. People often ask me how I trained him to be so well behaved. The secret is simple: patience, love, and a lot of treats. If you are thinking about getting a dog, make sure you have enough time for it.",
+   zh:"大家好，今天我要给你们介绍我的狗，一只叫 Lucky 的金毛寻回犬。它已经和我们家在一起快三年了。每天早上，它都会跳上我的床、舔我的脸把我叫醒。人们经常问我，是怎么把它训练得这么乖巧的。秘诀很简单：耐心、爱，还有大量的零食。如果你正考虑养狗，一定要确保你有足够的时间。",
+   grammar:["不定式 to introduce + 过去分词作定语 named","现在完成时 has been + 时间段","一般现在时 wakes + by 动名词 jumping/licking","宾语从句 ask how + 一般过去时 trained","系表 be + 名词并列","条件状语从句 if + 现在进行时 are thinking + 祈使句 make sure"]},
+  {id:"p47", title:"露营vlog", level:"高级", focus:"日常口语",
+   en:"What is going on, everyone. This weekend I went camping in the mountains with three close friends. We arrived at the campsite late in the afternoon and set up our tents before dark. In the evening, we sat around the fire, told stories, and cooked our dinner over the flames. The night sky was so clear that we could see thousands of stars. Although it was cold, the experience was totally worth it. I cannot wait to go back there again next summer.",
+   zh:"大家好啊。这个周末我和三个好朋友去山里露营了。我们在傍晚到达营地，赶在天黑前搭好了帐篷。晚上，我们围坐在篝火旁，讲故事、在火上做晚饭。夜空清澈得能看到成千上万颗星星。虽然很冷，但这次经历完全值得。我迫不及待明年夏天再回到那里。",
+   grammar:["问候语 what is going on","一般过去时 went camping + 时间状语","一般过去时 arrived/set up + 时间状语 before dark","一般过去时 sat/told/cooked 并列","so...that 结果状语从句 + 情态动词 could","让步状语从句 although + 系表 was worth","情态动词 cannot wait + 不定式 to go"]},
+  {id:"p48", title:"书店vlog", level:"高级", focus:"日常口语",
+   en:"Welcome to another vlog. Today I am taking you to my favorite bookstore in the city. It is a small shop hidden between two tall buildings, easy to miss if you do not look carefully. Inside, the shelves are full of books from every country you can imagine. The owner, an old man who has run the shop for thirty years, knows every corner of it. I ended up buying three novels and a collection of short stories. Reading them by the window with a cup of coffee is my idea of a perfect afternoon.",
+   zh:"欢迎来到另一期 vlog。今天我要带你们去城里我最喜欢的书店。它是一家藏在两栋高楼之间的小店，不仔细看很容易错过。店里书架上摆满了你能想象到的世界各国的书。店主是一位经营这家店三十年的老人，对每个角落都了如指掌。我最后买了三本小说和一本短篇小说集。坐在窗边、喝着一杯咖啡读它们，就是我心中完美的下午。",
+   grammar:["问候语 welcome","现在进行时 am taking + 最高级 favorite","过去分词作定语 hidden + 不定式 to miss + if 从句","定语从句 you can imagine","定语从句 who has run + 现在完成时","动名词作宾语 ended up buying","动名词 Reading 作主语 + 系表"]},
+  {id:"p49", title:"节日vlog", level:"高级", focus:"日常口语",
+   en:"Happy holidays, everyone. Today is the biggest festival of the year in our town. From early morning, the streets have been full of people singing and dancing. My family has a tradition of making special dumplings together on this day. Grandma always says that the dumplings taste better when everyone helps to make them. In the evening, we will watch the fireworks by the river and take lots of photos. I love this day because it brings the whole family together.",
+   zh:"大家节日快乐。今天是我们镇上一年中最盛大的节日。从清晨开始，街上就挤满了唱歌跳舞的人。我们家有个传统，就是这天一起包特别的饺子。奶奶总说，大家一起帮忙包出来的饺子更好吃。晚上，我们会去河边看烟花、拍很多照片。我爱这一天，因为它让全家人团聚在一起。",
+   grammar:["问候语 happy holidays","最高级 the biggest + 介词短语","现在完成时 have been + 现在分词 singing/dancing","动名词 making 作宾语","宾语从句 says + 比较级 better + when 从句","一般将来时 will watch + 并列 take","because 原因状语从句 + 一般现在时 brings"]},
+  {id:"p50", title:"城市漫步vlog", level:"高级", focus:"日常口语",
+   en:"Hey, come with me on a walk through the old part of the city. I love getting lost in these narrow streets where every corner holds a surprise. There is a tiny noodle shop here that has been open for over fifty years. The owner still makes every bowl by hand, which is why people line up outside every day. I always stop by for a bowl when I am in the neighborhood. Walking through these streets always reminds me of my childhood.",
+   zh:"嘿，跟我一起穿过老城区走走吧。我喜欢在这些狭窄的街道里迷路，因为每个转角都藏着惊喜。这里有一家开了五十多年的小面馆。老板至今仍亲手做每一碗面，所以每天门口都排着长队。每次来这附近，我都会来吃一碗。走过这些街道总让我想起童年。",
+   grammar:["祈使句 come + 介词短语","动名词作宾语 getting lost + 定语从句 where","定语从句 that + 现在完成时 has been open","非限制性定语从句 which is why + 一般现在时 line up","时间状语从句 when + 一般现在时 am","动名词 Walking 作主语 + 一般现在时 reminds"]}
 ];
 
 const DICT = {
@@ -1227,6 +1273,151 @@ const DICT = {
 "aim":"v. 旨在",
 "achieve":"v. 实现",
 "leading":"adj. 领先的",
+"able":"adj. 能够的",
+"album":"n. 专辑",
+"almost":"adv. 几乎",
+"although":"conj. 虽然",
+"arrive":"v. 到达",
+"atmosphere":"n. 大气层",
+"author":"n. 作者",
+"begin":"v. 开始",
+"behave":"v. 表现",
+"biggest":"adj. 最大的",
+"billion":"num. 十亿",
+"bookstore":"n. 书店",
+"brought":"v. 带来（过去式）",
+"building":"n. 建筑",
+"camp":"v. 露营",
+"campsite":"n. 营地",
+"cannot":"aux. 不能",
+"carefully":"adv. 仔细地",
+"childhood":"n. 童年",
+"children":"n. 孩子们",
+"coach":"n. 教练",
+"collection":"n. 集子；收藏",
+"complete":"v. 完成",
+"conclusion":"n. 结论",
+"corner":"n. 角落",
+"critic":"n. 评论家",
+"cup":"n. 杯子",
+"dance":"v. 跳舞",
+"disease":"n. 疾病",
+"dog":"n. 狗",
+"dumpling":"n. 饺子",
+"during":"prep. 在…期间",
+"earth":"n. 地球",
+"famous":"adj. 著名的",
+"fan":"n. 粉丝",
+"festival":"n. 节日",
+"fifty":"num. 五十",
+"finding":"n. 发现",
+"fire":"n. 火",
+"firework":"n. 烟花",
+"flame":"n. 火焰",
+"football":"n. 足球",
+"forget":"v. 忘记",
+"fresh":"adj. 新鲜的",
+"game":"n. 比赛",
+"gas":"n. 气体",
+"golden":"adj. 金色的",
+"grandma":"n. 奶奶",
+"hidden":"v. 隐藏（过去分词）",
+"him":"pron. 他（宾格）",
+"hold":"v. 容纳；握住",
+"holiday":"n. 假日",
+"honest":"adj. 真诚的",
+"imagine":"v. 想象",
+"include":"v. 包括",
+"industry":"n. 行业",
+"inside":"adv. 在里面",
+"international":"adj. 国际的",
+"introduce":"v. 介绍",
+"journal":"n. 期刊",
+"jump":"v. 跳",
+"lick":"v. 舔",
+"lie":"v. 位于；躺",
+"look":"v. 看",
+"lost":"adj. 迷路的；失去的",
+"low":"adj. 低的",
+"lucky":"adj. 幸运的",
+"lyric":"n. 歌词",
+"made":"v. 做（过去式）",
+"man":"n. 男人",
+"match":"n. 比赛",
+"million":"num. 百万",
+"movement":"n. 运动",
+"narrow":"adj. 狭窄的",
+"national":"adj. 国家的",
+"neighborhood":"n. 街区；附近",
+"none":"pron. 没有一个",
+"novel":"n. 小说",
+"observation":"n. 观测",
+"onto":"prep. 到…上",
+"outside":"adv. 在外面",
+"overnight":"adv. 一夜之间",
+"perfect":"adj. 完美的",
+"period":"n. 时期",
+"player":"n. 球员",
+"position":"n. 位置",
+"praise":"v. 称赞",
+"produce":"v. 产生",
+"program":"n. 计划",
+"project":"n. 项目",
+"provide":"v. 提供",
+"publish":"v. 发表",
+"recent":"adj. 近期的",
+"regularly":"adv. 经常地",
+"remind":"v. 提醒",
+"retriever":"n. 寻回犬",
+"risk":"n. 风险",
+"river":"n. 河",
+"rural":"adj. 农村的",
+"said":"v. 说（过去式）",
+"sat":"v. 坐（过去式）",
+"score":"v. 得分",
+"season":"n. 赛季",
+"second":"num. 第二；秒",
+"secret":"n. 秘诀",
+"shelf":"n. 书架",
+"shop":"n. 店",
+"shown":"v. 展示（过去分词）",
+"singer":"n. 歌手",
+"sing":"v. 唱歌",
+"size":"n. 大小",
+"sky":"n. 天空",
+"song":"n. 歌曲",
+"special":"adj. 特别的",
+"stadium":"n. 体育场",
+"star":"n. 恒星；明星",
+"story":"n. 故事",
+"suggest":"v. 建议",
+"sure":"adj. 确定的",
+"tall":"adj. 高的",
+"taste":"v. 尝起来",
+"team":"n. 队",
+"telescope":"n. 望远镜",
+"tent":"n. 帐篷",
+"textbook":"n. 教材",
+"through":"prep. 穿过",
+"tiny":"adj. 微小的",
+"title":"n. 冠军；标题",
+"told":"v. 告诉（过去式）",
+"totally":"adv. 完全地",
+"tournament":"n. 锦标赛",
+"tradition":"n. 传统",
+"turn":"v. 扭转；转",
+"unique":"adj. 独特的",
+"vlog":"n. 视频博客",
+"voice":"n. 嗓音",
+"volunteer":"v. 自愿",
+"wake":"v. 醒来",
+"watch":"v. 观看",
+"whistle":"n. 哨声",
+"whole":"adj. 整个的",
+"win":"v. 赢",
+"won":"v. 赢（过去式）",
+"worth":"adj. 值得的",
+"shelves":"n. 书架",
 };
 
 const $ = id => document.getElementById(id);
@@ -1240,6 +1431,7 @@ if ('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged 
 
 /* ---------- 状态 ---------- */
 const state = { passage:null, sentences:[], idx:0, rate:0.8, accent:'en-US' };
+let compareTimer = null;
 
 /* ---------- 工具 ---------- */
 function toWords(text){
@@ -1395,6 +1587,7 @@ function loadSentence(){
   inputEl.value = s.user || '';
   inputEl.classList.remove('retry');
   $('live-preview').classList.add('hidden');
+  clearCompare();
   resultEl.classList.add('hidden'); resultEl.innerHTML='';
   $('reveal-btn').disabled = false;
   $('prev-btn').disabled = state.idx===0;
@@ -1436,12 +1629,9 @@ function check(){
     $('live-preview').classList.add('hidden');
   } else {
     s.done = false;
-    inputEl.classList.add('retry');
-    inputEl.value = '';
-    s.user = '';
-    $('live-preview').classList.remove('hidden');
-    livePreview();
-    inputEl.focus();
+    inputEl.classList.remove('retry');
+    $('live-preview').classList.add('hidden');
+    startCompare();
   }
   saveProgress();
 }
@@ -1472,6 +1662,35 @@ function livePreview(){
   const u = toWords(inputEl.value);
   const c = toWords(s.text);
   $('live-preview').innerHTML = u.map((w,i)=>'<span class="pchip '+(w===c[i]?'ok':'miss')+'">'+w+'</span>').join(' ') || '';
+}
+function clearCompare(){
+  if(compareTimer){ clearInterval(compareTimer); compareTimer = null; }
+  $('compare-banner').classList.add('hidden');
+}
+function startCompare(){
+  clearCompare();
+  $('compare-banner').classList.remove('hidden');
+  let left = 30;
+  $('compare-count').textContent = left;
+  compareTimer = setInterval(()=>{
+    left--;
+    if(left <= 0){
+      clearCompare();
+      startRewrite();
+    } else {
+      $('compare-count').textContent = left;
+    }
+  }, 1000);
+}
+function startRewrite(){
+  const s = state.sentences[state.idx];
+  inputEl.classList.add('retry');
+  inputEl.value = '';
+  s.user = '';
+  $('live-preview').classList.remove('hidden');
+  livePreview();
+  inputEl.focus();
+  speak();
 }
 function reveal(){
   const s = state.sentences[state.idx];
@@ -1571,10 +1790,10 @@ function showSummary(){
 $('play-btn').onclick = speak;
 $('check-btn').onclick = check;
 $('reveal-btn').onclick = reveal;
-$('skip-btn').onclick = ()=>{ const s=state.sentences[state.idx]; s.skipped=true; s.done=true; go(1); };
+$('skip-btn').onclick = ()=>{ clearCompare(); const s=state.sentences[state.idx]; s.skipped=true; s.done=true; go(1); };
 $('prev-btn').onclick = ()=>go(-1);
 $('next-btn').onclick = ()=>go(1);
-$('back-btn').onclick = ()=>{ saveInput(); homeEl.classList.remove('hidden'); practiceEl.classList.add('hidden'); summaryEl.classList.add('hidden'); renderHome(); };
+$('back-btn').onclick = ()=>{ clearCompare(); saveInput(); homeEl.classList.remove('hidden'); practiceEl.classList.add('hidden'); summaryEl.classList.add('hidden'); renderHome(); };
 function restart(){
   state.sentences = splitSentences(state.passage.en).map((t,i)=>({text:t, user:'', checked:false, score:0, ops:null, done:false, skipped:false, grammar:(state.passage.grammar&&state.passage.grammar[i])||''}));
   state.idx = 0;
@@ -1591,6 +1810,7 @@ inputEl.addEventListener('keydown', e=>{
 inputEl.addEventListener('input', ()=>{
   if(!$('live-preview').classList.contains('hidden')) livePreview();
 });
+$('compare-now').onclick = ()=>{ clearCompare(); startRewrite(); };
 
 $('recap-close').onclick = ()=>$('recap-overlay').classList.add('hidden');
 $('recap-overlay').addEventListener('click', e=>{ if(e.target.id==='recap-overlay') e.target.classList.add('hidden'); });
